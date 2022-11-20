@@ -1,11 +1,10 @@
 {
   "name": "maccabi-toothy-tooth",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "🦷 CLI for fetching next available Maccabi \"Shinanit\" appointments",
   "main": "index.js",
   "scripts": {
     "dev": "tsc && node dist/index.js",
-    "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
