@@ -2,12 +2,9 @@
 
 🕒 Get next available appointments, run (output to `sdout`):
 
-<br/>
-
 ```sh
 npm run start 
 ```
-<br/>
 
 ### 🌲 Env vars
 
