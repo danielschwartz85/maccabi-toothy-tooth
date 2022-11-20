@@ -1,6 +1,6 @@
-# Maccabi Toothy-tooth (shinnait) 🦷
+# Maccabi Toothy-tooth (shinnanit) 🦷
 
-🕒 Get next available appointments, run (output to `sdout`):
+🕒 Get next available "shinnanit" appointments, run (output to `sdout`):
 
 ```sh
 npm run start 
