@@ -2,24 +2,10 @@
 
 🕒 Get next available "shinnanit" appointments
 
-1. Clone repo (_npm soon_)
-    ```sh
-    git clone https://github.com/danielschwartz85/maccabi-toothy-tooth.git
-    cd maccabi-toothy-tooth/
-    ```
-
-2. Run
-
-    _in repo:_
-    ```sh
-    npm run start
-    ```
-
-    _or install globally:_
-    ```sh
-    > npm i -g
-    > shinanit # get appointments..
-    ```
+Run
+  ```sh
+  npx maccabi-toothy-tooth
+  ```
 
 ### 🌲 Env vars
 
