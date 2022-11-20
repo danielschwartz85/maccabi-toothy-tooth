@@ -1,4 +1,4 @@
-# 🦷 Maccabi Toothy-tooth (shinnait)
+# Maccabi Toothy-tooth (shinnait) 🦷
 
 🕒 Get next available appointments, run (output to `sdout`):
 
