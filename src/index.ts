@@ -7,8 +7,8 @@ const DaysAhead = process.env.MC_LIMIT_DAYS ? Number(process.env.MC_LIMIT_DAYS) 
 
 (async () => {
   const spinner = ora("Fetching").start();
-  const { lines } = await fetcAppontements();
-  spinner.succeed(lines.length ? "Cool, got something:" : "Done, sorry no avaialbe appointements.");
+  const isFound = !!Object.keys(lines.length).length;
+  spinner.succeed(isFound ? "Cool, got something:" : "Done, sorry no avaialbe appointements.");
   const dates = filterInterstingDates(lines);
   printDateLine(dates);
 })();
