@@ -5,6 +5,7 @@
 Just run `npx maccabi-toothy-tooth`
 
 ![cli examlpe](./cli.png)
+_Now suporting only Tel Aviv area_
 
 ### 🌲 Env vars
 
