@@ -2,10 +2,8 @@
 
 🕒 Get next available "shinnanit" appointments
 
-Run
-  ```sh
-  npx maccabi-toothy-tooth
-  ```
+Just run `npx maccabi-toothy-tooth`
+
 ![cli examlpe](./cli.png)
 
 ### 🌲 Env vars
