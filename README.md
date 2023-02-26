@@ -6,6 +6,7 @@ Run
   ```sh
   npx maccabi-toothy-tooth
   ```
+![cli examlpe](./cli.png)
 
 ### 🌲 Env vars
 
