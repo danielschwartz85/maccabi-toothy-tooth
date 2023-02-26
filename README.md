@@ -11,4 +11,4 @@ _Now suporting only Tel Aviv area_
 
 | name                | desc                                        | default   |
 |:-----:              |:-------:                                    |:--------:  
-| `MC_LIMIT_DAYS`     | Limit the maximum time for the appointments | `14`      |
+| `MC_LIMIT_DAYS`     | Limit the maximum number of days (from now) from which to find appointments in | next `14` days      |
