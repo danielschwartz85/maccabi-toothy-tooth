@@ -1,11 +1,9 @@
 # Maccabi Toothy-tooth (shinnanit) 🦷
-### Get next available "shinnanit" appointments
-
-Just run `npx maccabi-toothy-tooth`
+### Just run `npx maccabi-toothy-tooth` and get the next available "shinnanit" appointements:
 
 ![cli examlpe](./cli.png)
 
-_Now suporting Tel Aviv only 🌆_
+_Currently Tel Aviv only 🌆_
 
 ### Env vars
 
