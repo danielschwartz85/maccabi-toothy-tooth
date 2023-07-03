@@ -1,4 +1,4 @@
-# Maccabi Toothy-tooth (shinnanit) 🦷
+# Maccabi Toothy Tooth (shinnanit) 🦷
 ### Just run `npx maccabi-toothy-tooth` and get the next available "shinnanit" appointements:
 
 ![cli examlpe](./cli.png)
