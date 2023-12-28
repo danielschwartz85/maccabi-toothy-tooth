@@ -2,24 +2,59 @@
 import axios from "axios";
 import { Maccabi } from "./interfaces";
 import ora from "ora";
+import inquirer from "inquirer";
+import { Clinics as rawClinics } from "./clinics.js";
 
-const DaysAhead = process.env.MC_LIMIT_DAYS ? Number(process.env.MC_LIMIT_DAYS) : 14;
+const Clinics = rawClinics.map((c) => ({ macabi_id: c.macabi_id, label: c.label.split("").reverse().join("") }));
+const DefaultNumOfDays = 14 as const;
+const DefaultClinicIndex = 32 as const;
 
 (async () => {
-  const spinner = ora("Fetching").start();
-  const { lines } = await fetcAppontements();
-  spinner.succeed(lines.length ? "Cool, got something:" : "Done, sorry no avaialbe appontenets.");
-  const dates = filterInterstingDates(lines);
+  const { numOfDays, clinic } = await getUserInput();
+  const spinner = (console.log(""), ora("Fetching").start());
+  const { lines } = await fetcAppontements(clinic);
+  const dates = filterInterstingDates(lines, numOfDays);
   spinner.succeed(dates.length ? "Cool, got something:" : "Done, sorry no avaialbe appointements.");
   printDateLine(dates);
 })();
 
-async function fetcAppontements(): Promise<Maccabi.Response> {
+async function getUserInput(): Promise<{ clinic: string; numOfDays: number }> {
+  const choices = Clinics.map((c) => c.label);
+  const choicesMap = Clinics.reduce<Record<string, string>>(
+    (acc, item) => ({ ...acc, [item.label]: item.macabi_id }),
+    {},
+  );
+  const answers = await inquirer.prompt<{ clinic: string; numOfDays: number }>([
+    {
+      type: "list",
+      name: "clinic",
+      message: "I want appointment at",
+      choices,
+      filter(label: string) {
+        return choicesMap[label];
+      },
+      default() {
+        return DefaultClinicIndex;
+      },
+    },
+    {
+      type: "number",
+      name: "numOfDays",
+      message: "I want an appointment in the following number of days:",
+      default(): number {
+        return DefaultNumOfDays;
+      },
+    },
+  ]);
+  return answers;
+}
+
+async function fetcAppontements(clinic: string): Promise<Maccabi.Response> {
   const { data } = await axios.post<Maccabi.Response>(
     "https://maccabi-dent.com/wp-admin/admin-ajax.php",
     new URLSearchParams({
       action: "get_lines",
-      "data[macabi_id]": "37",
+      "data[macabi_id]": clinic,
       "data[service_type]": "hygenist",
       "data[age]": "A",
       paged: "1",
@@ -52,13 +87,13 @@ async function fetcAppontements(): Promise<Maccabi.Response> {
         "sec-ch-ua-mobile": "?0",
         "sec-ch-ua-platform": '"Windows"',
       },
-    }
+    },
   );
   return data;
 }
 
-function filterInterstingDates(lines: Maccabi.Dates): { dateLine: Maccabi.DateLine; date: Date }[] {
-  const limit = Date.now() + DaysAhead * 24 * 60 * 60 * 1000;
+function filterInterstingDates(lines: Maccabi.Dates, numOfDays: number): { dateLine: Maccabi.DateLine; date: Date }[] {
+  const limit = Date.now() + numOfDays * 24 * 60 * 60 * 1000;
   const intrestingEntries = Object.entries(lines).filter(([epochSecStr]) => Number(epochSecStr) * 1000 <= limit);
   const result = intrestingEntries.map(([epochSecStr, dateLine]) => ({
     dateLine,

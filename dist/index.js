@@ -1,18 +1,50 @@
 #! /usr/bin/env node
 import axios from "axios";
 import ora from "ora";
-const DaysAhead = process.env.MC_LIMIT_DAYS ? Number(process.env.MC_LIMIT_DAYS) : 14;
+import inquirer from "inquirer";
+import { Clinics as rawClinics } from "./clinics.js";
+const Clinics = rawClinics.map((c) => ({ macabi_id: c.macabi_id, label: c.label.split("").reverse().join("") }));
+const DefaultNumOfDays = 14;
+const DefaultClinicIndex = 32;
 (async () => {
-    const spinner = ora("Fetching").start();
-    const { lines } = await fetcAppontements();
-    spinner.succeed(lines.length ? "Cool, got something:" : "Done, sorry no avaialbe appontenets.");
-    const dates = filterInterstingDates(lines);
+    const { numOfDays, clinic } = await getUserInput();
+    const spinner = (console.log(""), ora("Fetching").start());
+    const { lines } = await fetcAppontements(clinic);
+    const dates = filterInterstingDates(lines, numOfDays);
+    spinner.succeed(dates.length ? "Cool, got something:" : "Done, sorry no avaialbe appointements.");
     printDateLine(dates);
 })();
-async function fetcAppontements() {
+async function getUserInput() {
+    const choices = Clinics.map((c) => c.label);
+    const choicesMap = Clinics.reduce((acc, item) => ({ ...acc, [item.label]: item.macabi_id }), {});
+    const answers = await inquirer.prompt([
+        {
+            type: "list",
+            name: "clinic",
+            message: "I want appointment at",
+            choices,
+            filter(label) {
+                return choicesMap[label];
+            },
+            default() {
+                return DefaultClinicIndex;
+            },
+        },
+        {
+            type: "number",
+            name: "numOfDays",
+            message: "I want an appointment in the following number of days:",
+            default() {
+                return DefaultNumOfDays;
+            },
+        },
+    ]);
+    return answers;
+}
+async function fetcAppontements(clinic) {
     const { data } = await axios.post("https://maccabi-dent.com/wp-admin/admin-ajax.php", new URLSearchParams({
         action: "get_lines",
-        "data[macabi_id]": "37",
+        "data[macabi_id]": clinic,
         "data[service_type]": "hygenist",
         "data[age]": "A",
         paged: "1",
@@ -45,8 +77,8 @@ async function fetcAppontements() {
     });
     return data;
 }
-function filterInterstingDates(lines) {
-    const limit = Date.now() + DaysAhead * 24 * 60 * 60 * 1000;
+function filterInterstingDates(lines, numOfDays) {
+    const limit = Date.now() + numOfDays * 24 * 60 * 60 * 1000;
     const intrestingEntries = Object.entries(lines).filter(([epochSecStr]) => Number(epochSecStr) * 1000 <= limit);
     const result = intrestingEntries.map(([epochSecStr, dateLine]) => ({
         dateLine,
