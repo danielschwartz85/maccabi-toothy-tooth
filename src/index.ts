@@ -28,7 +28,7 @@ async function getUserInput(): Promise<{ clinic: string; numOfDays: number }> {
     {
       type: "list",
       name: "clinic",
-      message: "I want appointment at",
+      message: "I want an appointment at",
       choices,
       filter(label: string) {
         return choicesMap[label];

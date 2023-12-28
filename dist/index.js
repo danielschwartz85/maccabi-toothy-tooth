@@ -21,7 +21,7 @@ async function getUserInput() {
         {
             type: "list",
             name: "clinic",
-            message: "I want appointment at",
+            message: "I want an appointment at",
             choices,
             filter(label) {
                 return choicesMap[label];
