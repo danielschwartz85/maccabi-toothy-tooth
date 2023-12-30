@@ -25,9 +25,11 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
+    "@types/yargs": "^17.0.32",
     "axios": "^1.1.3",
     "inquirer": "^9.2.12",
-    "ora": "^6.1.2"
+    "ora": "^6.1.2",
+    "yargs": "^17.7.2"
   },
   "repository": "https://github.com/danielschwartz85/maccabi-toothy-tooth",
   "homepage": "https://github.com/danielschwartz85/maccabi-toothy-tooth"

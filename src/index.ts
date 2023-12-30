@@ -1,60 +1,114 @@
 #! /usr/bin/env node
 import axios from "axios";
-import { Maccabi } from "./interfaces";
 import ora from "ora";
+import yargs from "yargs";
 import inquirer from "inquirer";
+import { Maccabi } from "./interfaces";
 import { Clinics as rawClinics } from "./clinics.js";
+
+let { clinic, numOfDays } = await yargs(process.argv.slice(2))
+  .usage("Usage: npx maccabi-toothy-tooth [-c <number>][-d <number>]")
+  .options({
+    clinic: {
+      alias: "c",
+      number: true,
+      demandOption: false,
+      choices: rawClinics.map((c) => Number(c.macabi_id)),
+      description: "Maccabi clinic id",
+      nargs: 1,
+    },
+    numOfDays: {
+      alias: "n",
+      number: true,
+      description: "Number of days to limit the search for.",
+      nargs: 1,
+      demandOption: false,
+    },
+  })
+  .check((argv) => {
+    if (argv.numOfDays !== undefined && argv.numOfDays < 1) {
+      throw new Error('"numOfDays" must be greater or equall to 1');
+    }
+    return true;
+  })
+  .example("npx maccabi-toothy-tooth -c 37 -d 14", "Get apponitements in Tel-Aviv for the next 14 days.")
+  .example("npx maccabi-toothy-tooth", "Prompt user for city and number of days.")
+  .help("h")
+  .alias("h", "help")
+  .epilog("Daniel Schwartz Inc. 2024").argv;
 
 const Clinics = rawClinics.map((c) => ({ macabi_id: c.macabi_id, label: c.label.split("").reverse().join("") }));
 const DefaultNumOfDays = 14 as const;
 const DefaultClinicIndex = 32 as const;
 
 (async () => {
-  const { numOfDays, clinic } = await getUserInput();
+  // Prompt user if missing args:
+  const { numOfDays: inputNumOfDays, clinic: inputClinic } = await getUserInput({
+    getClinic: !clinic,
+    getNumOfDays: !numOfDays,
+  });
+  clinic ||= inputClinic;
+  numOfDays ||= inputNumOfDays;
+  // Fetch appointements:
   const spinner = (console.log(""), ora("Fetching").start());
-  const { lines } = await fetcAppontements(clinic);
-  const dates = filterInterstingDates(lines, numOfDays);
+  const { lines: appointements } = await fetcAppontements(<number>clinic);
+  // Filter:
+  const dates = filterInterstingDates(appointements, <number>numOfDays);
   spinner.succeed(dates.length ? "Cool, got something:" : "Done, sorry no avaialbe appointements.");
-  printDateLine(dates);
+  // Print:
+  printDateAppointements(dates);
 })();
 
-async function getUserInput(): Promise<{ clinic: string; numOfDays: number }> {
+async function getUserInput({
+  getClinic = true,
+  getNumOfDays = true,
+}: {
+  getClinic?: boolean;
+  getNumOfDays?: boolean;
+} = {}): Promise<{ clinic?: number; numOfDays?: number }> {
+  if (!getClinic && !getNumOfDays) return {};
+
   const choices = Clinics.map((c) => c.label);
   const choicesMap = Clinics.reduce<Record<string, string>>(
     (acc, item) => ({ ...acc, [item.label]: item.macabi_id }),
     {},
   );
-  const answers = await inquirer.prompt<{ clinic: string; numOfDays: number }>([
-    {
-      type: "list",
-      name: "clinic",
-      message: "I want an appointment at",
-      choices,
-      filter(label: string) {
-        return choicesMap[label];
-      },
-      default() {
-        return DefaultClinicIndex;
-      },
-    },
-    {
-      type: "number",
-      name: "numOfDays",
-      message: "I want an appointment in the following number of days:",
-      default(): number {
-        return DefaultNumOfDays;
-      },
-    },
-  ]);
+  const prompts = [
+    getClinic
+      ? {
+          type: "list",
+          name: "clinic",
+          message: "I want an appointment at",
+          choices,
+          filter(label: string) {
+            return Number(choicesMap[label]);
+          },
+          default() {
+            return DefaultClinicIndex;
+          },
+        }
+      : undefined,
+    getNumOfDays
+      ? {
+          type: "number",
+          name: "numOfDays",
+          message: "I want an appointment in the following number of days:",
+          default(): number {
+            return DefaultNumOfDays;
+          },
+        }
+      : undefined,
+  ].filter(Boolean);
+  const answers = await inquirer.prompt<{ clinic: number; numOfDays: number }>(prompts);
   return answers;
 }
 
-async function fetcAppontements(clinic: string): Promise<Maccabi.Response> {
+async function fetcAppontements(clinic: number): Promise<Maccabi.Response> {
   const { data } = await axios.post<Maccabi.Response>(
     "https://maccabi-dent.com/wp-admin/admin-ajax.php",
     new URLSearchParams({
       action: "get_lines",
-      "data[macabi_id]": clinic,
+      "data[macabi_id]": clinic.toString(),
       "data[service_type]": "hygenist",
       "data[age]": "A",
       paged: "1",
@@ -102,7 +156,7 @@ function filterInterstingDates(lines: Maccabi.Dates, numOfDays: number): { dateL
   return result;
 }
 
-function printDateLine(dates: { dateLine: Maccabi.DateLine; date: Date }[]) {
+function printDateAppointements(dates: { dateLine: Maccabi.DateLine; date: Date }[]) {
   for (const { date, dateLine } of dates) {
     console.log("\n🦷", date.toDateString());
     const times = Object.values(dateLine).map(({ time, lines }) => ({
