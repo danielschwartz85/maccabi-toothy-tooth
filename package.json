@@ -1,6 +1,6 @@
 {
   "name": "maccabi-toothy-tooth",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "🦷 CLI for fetching next available Maccabi \"Shinanit\" appointments",
   "main": "index.js",
   "scripts": {
