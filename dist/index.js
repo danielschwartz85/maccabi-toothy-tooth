@@ -4,6 +4,10 @@ import ora from "ora";
 import yargs from "yargs";
 import inquirer from "inquirer";
 import { Clinics as rawClinics } from "./clinics.js";
+const Clinics = rawClinics.map((c) => ({ macabi_id: c.macabi_id, label: c.label.split("").reverse().join("") }));
+const DefaultNumOfDays = 14;
+const DefaultClinicIndex = 32;
+const MaccabiUrl = "https://maccabi-dent.com/%D7%AA%D7%95%D7%A8-%D7%9C%D7%9C%D7%90-%D7%A1%D7%99%D7%A1%D7%9E%D7%90/";
 let { clinic, numOfDays } = await yargs(process.argv.slice(2))
     .usage("Usage: npx maccabi-toothy-tooth [-c <number>][-d <number>]")
     .options({
@@ -25,18 +29,15 @@ let { clinic, numOfDays } = await yargs(process.argv.slice(2))
 })
     .check((argv) => {
     if (argv.numOfDays !== undefined && argv.numOfDays < 1) {
-        throw new Error('"numOfDays" must be greater or equall to 1');
+        throw new Error('"numOfDays" must be greater or equal to 1');
     }
     return true;
 })
-    .example("npx maccabi-toothy-tooth -c 37 -d 14", "Get apponitements in Tel-Aviv for the next 14 days.")
+    .example("npx maccabi-toothy-tooth -c 37 -d 14", "Get appointments in Tel-Aviv for the next 14 days.")
     .example("npx maccabi-toothy-tooth", "Prompt user for city and number of days.")
     .help("h")
     .alias("h", "help")
     .epilog("Daniel Schwartz Inc. 2024").argv;
-const Clinics = rawClinics.map((c) => ({ macabi_id: c.macabi_id, label: c.label.split("").reverse().join("") }));
-const DefaultNumOfDays = 14;
-const DefaultClinicIndex = 32;
 (async () => {
     // Prompt user if missing args:
     const { numOfDays: inputNumOfDays, clinic: inputClinic } = await getUserInput({
@@ -45,14 +46,14 @@ const DefaultClinicIndex = 32;
     });
     clinic ||= inputClinic;
     numOfDays ||= inputNumOfDays;
-    // Fetch appointements:
+    // Fetch appointments:
     const spinner = (console.log(""), ora("Fetching").start());
-    const { lines: appointements } = await fetcAppontements(clinic);
+    const { lines: appointments } = await fetchAppointments(clinic);
     // Filter:
-    const dates = filterInterstingDates(appointements, numOfDays);
-    spinner.succeed(dates.length ? "Cool, got something:" : "Done, sorry no avaialbe appointements.");
+    const dates = filterDatesOfInterest(appointments, numOfDays);
+    spinner.succeed(dates.length ? "Cool, got something:" : "Done, sorry no available appointments.");
     // Print:
-    printDateAppointements(dates);
+    printDateAppointments(dates);
 })();
 async function getUserInput({ getClinic = true, getNumOfDays = true, } = {}) {
     if (!getClinic && !getNumOfDays)
@@ -88,7 +89,7 @@ async function getUserInput({ getClinic = true, getNumOfDays = true, } = {}) {
     const answers = await inquirer.prompt(prompts);
     return answers;
 }
-async function fetcAppontements(clinic) {
+async function fetchAppointments(clinic) {
     const { data } = await axios.post("https://maccabi-dent.com/wp-admin/admin-ajax.php", new URLSearchParams({
         action: "get_lines",
         "data[macabi_id]": clinic.toString(),
@@ -124,16 +125,16 @@ async function fetcAppontements(clinic) {
     });
     return data;
 }
-function filterInterstingDates(lines, numOfDays) {
+function filterDatesOfInterest(lines, numOfDays) {
     const limit = Date.now() + numOfDays * 24 * 60 * 60 * 1000;
-    const intrestingEntries = Object.entries(lines).filter(([epochSecStr]) => Number(epochSecStr) * 1000 <= limit);
-    const result = intrestingEntries.map(([epochSecStr, dateLine]) => ({
+    const interestingEntries = Object.entries(lines).filter(([epochSecStr]) => Number(epochSecStr) * 1000 <= limit);
+    const result = interestingEntries.map(([epochSecStr, dateLine]) => ({
         dateLine,
         date: new Date(Number(epochSecStr) * 1000),
     }));
     return result;
 }
-function printDateAppointements(dates) {
+function printDateAppointments(dates) {
     for (const { date, dateLine } of dates) {
         console.log("\n🦷", date.toDateString());
         const times = Object.values(dateLine).map(({ time, lines }) => ({
@@ -142,6 +143,9 @@ function printDateAppointements(dates) {
             doctor: prettyHebrewStr(lines?.[0]?.["doctor_name"]),
         }));
         console.table(times);
+    }
+    if (dates.length) {
+        console.log(`\nFor scheduling go to: ${MaccabiUrl}`);
     }
 }
 function prettyHebrewStr(str) {
