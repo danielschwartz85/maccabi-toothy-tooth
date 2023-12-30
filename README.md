@@ -17,7 +17,7 @@ Select the number of days and that's it!:
 _* Showing results from the surrounding areas._
 
 ## Script run, with args
-_If missing `numOfDays` or `clinicId` they would be prompted_
+_If missing `numOfDays` or `clinicId` they would be prompted for._
 
 ```sh
 npx maccabi-toothy-tooth [-c <clinicId>] [-n <numOfDays>] [-h|--help] [--version]
