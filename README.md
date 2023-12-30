@@ -20,7 +20,7 @@ _* Showing results from the surrounding areas._
 _If missing `numOfDays` or `clinicId` they would be prompted for._
 
 ```sh
-npx maccabi-toothy-tooth [-c <clinicId>] [-n <numOfDays>] [-h|--help] [--version]
+npx maccabi-toothy-tooth [-c <clinicId>] [-n <numOfDays>] [--help] [--version]
 ```
 
 | Clinic ID | City                     |
