@@ -9,7 +9,7 @@ const DefaultNumOfDays = 14;
 const DefaultClinicIndex = 32;
 const MaccabiUrl = "https://maccabi-dent.com/%D7%AA%D7%95%D7%A8-%D7%9C%D7%9C%D7%90-%D7%A1%D7%99%D7%A1%D7%9E%D7%90/";
 let { clinic, numOfDays } = await yargs(process.argv.slice(2))
-    .usage("Usage: npx maccabi-toothy-tooth [-c <number>][-d <number>]")
+    .usage("Usage: npx maccabi-toothy-tooth [-c <number>][-n <number>]")
     .options({
     clinic: {
         alias: "c",
@@ -47,7 +47,7 @@ let { clinic, numOfDays } = await yargs(process.argv.slice(2))
     clinic ||= inputClinic;
     numOfDays ||= inputNumOfDays;
     // Fetch appointments:
-    const spinner = (console.log(""), ora("Fetching").start());
+    const spinner = ora("Fetching").start();
     const { lines: appointments } = await fetchAppointments(clinic);
     // Filter:
     const dates = filterDatesOfInterest(appointments, numOfDays);
@@ -87,6 +87,7 @@ async function getUserInput({ getClinic = true, getNumOfDays = true, } = {}) {
             : undefined,
     ].filter(Boolean);
     const answers = await inquirer.prompt(prompts);
+    console.log("");
     return answers;
 }
 async function fetchAppointments(clinic) {
