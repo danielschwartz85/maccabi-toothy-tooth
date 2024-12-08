@@ -21,7 +21,7 @@ _* Showing results from the surrounding areas._
 ## Script Run with Arguments
 
 ```
-npx maccabi-toothy-tooth [-c <clinicId>] [-n <numOfDays>] [-rtl] [--help] [--version]
+npx maccabi-toothy-tooth [-c <clinicId>] [-n <numOfDays>] [-rtl|--help]
 ```
 
 * If `numOfDays` or `clinicId` are missing, then they will be prompted for.
