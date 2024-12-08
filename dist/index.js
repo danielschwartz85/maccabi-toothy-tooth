@@ -4,11 +4,10 @@ import ora from "ora";
 import yargs from "yargs";
 import inquirer from "inquirer";
 import { Clinics as rawClinics } from "./clinics.js";
-const Clinics = rawClinics.map((c) => ({ macabi_id: c.macabi_id, label: c.label.split("").reverse().join("") }));
 const DefaultNumOfDays = 14;
 const DefaultClinicIndex = 32;
 const MaccabiUrl = "https://maccabi-dent.com/%D7%AA%D7%95%D7%A8-%D7%9C%D7%9C%D7%90-%D7%A1%D7%99%D7%A1%D7%9E%D7%90/";
-let { clinic, numOfDays } = await yargs(process.argv.slice(2))
+let { clinic, numOfDays, rtl } = await yargs(process.argv.slice(2))
     .usage("Usage: npx maccabi-toothy-tooth [-c <number>][-n <number>]")
     .options({
     clinic: {
@@ -26,6 +25,12 @@ let { clinic, numOfDays } = await yargs(process.argv.slice(2))
         nargs: 1,
         demandOption: false,
     },
+    rtl: {
+        type: "string",
+        alias: "r",
+        description: "force right to left output (for terminals that don't support it)",
+        demandOption: false,
+    },
 })
     .check((argv) => {
     if (argv.numOfDays !== undefined && argv.numOfDays < 1) {
@@ -38,6 +43,8 @@ let { clinic, numOfDays } = await yargs(process.argv.slice(2))
     .help("h")
     .alias("h", "help")
     .epilog("Daniel Schwartz Inc. 2024").argv;
+const IsForceRtl = rtl !== undefined;
+const Clinics = rawClinics.map((c) => ({ macabi_id: c.macabi_id, label: prettyHebrewStr(c.label) }));
 (async () => {
     // Prompt user if missing args:
     const { numOfDays: inputNumOfDays, clinic: inputClinic } = await getUserInput({
@@ -151,7 +158,7 @@ function printDateAppointments(dates) {
 }
 function prettyHebrewStr(str) {
     const htmlDecoded = decodeEntities(str);
-    return htmlDecoded.split("").reverse().join("");
+    return !IsForceRtl ? htmlDecoded : htmlDecoded.split("").reverse().join("");
 }
 function decodeEntities(encodedString) {
     const translate_re = /&(nbsp|amp|quot|lt|gt);/g;
