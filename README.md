@@ -8,11 +8,11 @@ To get the next available _"shinnanit"_ appointments, run:
 npx maccabi-toothy-tooth
 ```
 
-1. Select city:
+1. Select city
 
     ![CLI Example](./cli1.png)
 
-2. Select the number of days and that's it!:
+2. Select the number of days and that's it!
 
     ![CLI Example](./cli2.png)
 
